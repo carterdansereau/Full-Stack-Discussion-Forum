@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.gitignore
+.vscode
+coverage
+test.db
+dev.db
+uploads
+*.log

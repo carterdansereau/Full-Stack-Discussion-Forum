@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  passwordHash String
+  displayName String   @unique
+  role        String   @default("user")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channels    Channel[]
+  posts       Post[]
+  replies     Reply[]
+  votes       Vote[]
+}
+
+model Channel {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator     User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  posts       Post[]
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  channelId   String
+  authorId    String
+  title       String
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  replies     Reply[]
+}
+
+model Reply {
+  id            String   @id @default(cuid())
+  postId        String
+  parentReplyId String?
+  authorId      String
+  body          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentReply   Reply?   @relation("ReplyHierarchy", fields: [parentReplyId], references: [id], onDelete: Cascade)
+  childReplies  Reply[]  @relation("ReplyHierarchy")
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  userId     String
+  targetType String
+  targetId   String
+  value      Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  targetType String
+  targetId   String
+  mimeType   String
+  sizeBytes  Int
+  storageRef String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

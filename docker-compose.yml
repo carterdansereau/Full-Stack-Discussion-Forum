@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:/app/data/dev.db"
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-secret-key}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-true}
+    volumes:
+      - db-data:/app/data
+      - uploads-data:/app/uploads
+
+volumes:
+  db-data:
+  uploads-data:
